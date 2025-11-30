@@ -113,3 +113,122 @@ BI Developer (Business Intelligence Developer)
 Designs ETL/ELT processes, data warehouses/data marts, cubes, reports, and dashboards.
 
 Translates business questions into data models and reporting artifacts for analytics.
+
+ANSWER QUESTION 4:
+
+Additional Research Topics
+4.1 Types of Databases
+Relational vs Non-Relational
+
+Relational (SQL)
+
+Examples: SQL Server, MySQL, PostgreSQL, Oracle.
+
+Structured schema, ACID compliance (in many engines), strong relational model using tables, joins, and SQL.
+
+Good for transactional systems and structured data.
+
+Non-Relational (NoSQL)
+
+Examples: MongoDB (document), Cassandra (wide-column), Redis (key-value), Neo4j (graph).
+
+Flexible schemas (schema-less or schema-on-read), optimized for specific patterns (large-scale reads/writes, hierarchical data, graph traversal).
+
+Often prioritize scalability and availability; some sacrifice strong consistency for performance (CAP theorem trade-offs).
+
+Centralized vs Distributed vs Cloud Databases
+
+Centralized — Single DB instance on a single server or cluster primarily accessed within a local network.
+
+Simpler to manage for small systems.
+
+Distributed — Data is spread across multiple nodes/locations; designed for fault tolerance, horizontal scalability, and geo-distribution.
+
+Examples: Cassandra, CockroachDB, Google Spanner.
+
+Cloud Databases — Managed database services provided by cloud vendors (e.g., Amazon RDS/Aurora, Azure SQL Database, Google Cloud Spanner).
+
+Advantages: managed backups, scaling, high availability, and reduced operational overhead.
+
+Many cloud offerings can be relational or NoSQL and can be single-region or multi-region.
+
+Use Case Examples
+
+OLTP systems (banking, e-commerce) — Relational databases.
+
+Large-scale logging and time-series — NoSQL (e.g., InfluxDB, Elasticsearch).
+
+Social networks and graph analytics — Graph databases (Neo4j).
+
+Real-time caching — Key-value stores (Redis).
+
+4.2 Cloud Storage and Databases
+What is Cloud Storage and how does it relate to databases?
+
+Cloud Storage refers to object/file storage services (e.g., Amazon S3, Azure Blob Storage) used to hold files, backups, and large objects. Cloud databases are managed DBMS offerings that store structured data and often use cloud storage for backup and blob data.
+
+Cloud databases combine DBMS functionality with cloud infrastructure, offering features like automatic backups, replication, and managed scaling.
+
+Advantages of cloud-based databases
+
+Reduced operational overhead (managed service)
+
+Built-in high availability and disaster recovery options
+
+Easy vertical/horizontal scaling
+
+Integration with other cloud services (analytics, monitoring)
+
+Disadvantages
+
+Vendor lock-in risk
+
+Potentially higher cost at scale
+
+Network latency and data sovereignty/regulatory concerns
+
+Less control over low-level configurations
+
+4.3 Database Engines and Languages
+What is a Database Engine?
+
+The database engine is the core software component that stores, retrieves, and manages data on disk/memory. It handles query parsing, optimization, transaction management, indexing, and storage.
+
+Examples
+
+Microsoft SQL Server (engine + tools)
+
+MySQL / MariaDB
+
+Oracle Database
+
+PostgreSQL
+
+Each has its own implementation details, storage engines (e.g., InnoDB for MySQL), and tooling.
+
+What languages do they use?
+
+SQL (ANSI SQL) — Standard query language used by most relational engines.
+
+T-SQL — Microsoft SQL Server’s extension to SQL (procedural features).
+
+PL/SQL — Oracle’s procedural extension to SQL.
+
+PL/pgSQL — PostgreSQL’s procedural language variant.
+
+Relationship between engine and language
+
+Engines implement SQL standards and often extend them with proprietary procedural languages and functions.
+
+While core SQL is portable, proprietary extensions (T-SQL, PL/SQL) are engine-specific and need adaptation when migrating.
+
+Can one language work across different engines?
+
+ANSI SQL queries (basic SELECT/INSERT/UPDATE/DELETE) are generally portable with minimal changes.
+
+Complex features (stored procedures, window functions, system functions, certain DDL statements) may require engine-specific changes.
+
+4.4 Can We Transfer a Database Between Engines?
+Is migration possible?
+
+Yes — migrating between engines (SQL Server → MySQL, Oracle → PostgreSQL) is possible and co.
