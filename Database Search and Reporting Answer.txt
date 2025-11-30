@@ -69,3 +69,7 @@ Poor scalability for complex data; fragile integrity; inefficient queries over l
 Relational Databases
 
 More complex to set up and maintain; can be heavier resource-wise; rigid schema can be limiting for highly variable/unstructured data (but modern RDBMS and extensions mitigate this).
+
+ANSWER QUESTION 2: 
+DBMS Advantages DIAGRAM IN FOLDER.
+
