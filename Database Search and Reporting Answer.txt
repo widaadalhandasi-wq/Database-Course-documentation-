@@ -1,0 +1,71 @@
+ANSWER QUESTION 1:
+
+Flat File Systems and Relational Databases across structure, redundancy, relationships, example usage, and drawbacks.
+
+Structure
+
+Flat File Systems
+
+Single-file storage where records are stored sequentially (e.g., CSV, TXT).
+
+No schema enforcement beyond the file structure itself.
+
+Data stored as plain text or simple binary formats; usually delimited fields.
+
+Relational Databases (RDBMS)
+
+Data organized into tables (relations) with rows and columns.
+
+Each table has a defined schema (data types, constraints, keys).
+
+Support for indexes, views, transactions, and query engines (SQL).
+
+Data Redundancy
+
+Flat File Systems
+
+High risk of redundancy — same data often duplicated across multiple files.
+
+No built-in mechanisms for normalization or constraints.
+
+Relational Databases
+
+Designed to minimize redundancy via normalization (1NF, 2NF, 3NF, BCNF, etc.).
+
+Referential integrity enforces consistent references between tables.
+
+Relationships
+
+Flat File Systems
+
+Relationships (if any) must be managed manually by the application logic (e.g., matching IDs across files).
+
+No constraints or joins at the storage layer.
+
+Relational Databases
+
+Native support for relationships (one-to-one, one-to-many, many-to-many) via foreign keys and join operations.
+
+Declarative queries (SQL) allow combining related data easily.
+
+Example Usage
+
+Flat File Systems
+
+Small, simple data exchange (logs, CSV exports/imports, one-off datasets).
+
+Lightweight tools, prototypes, configuration files.
+
+Relational Databases
+
+Business applications, financial systems, inventory, student records, e-commerce, and any system requiring concurrency and integrity.
+
+Drawbacks
+
+Flat File Systems
+
+Poor scalability for complex data; fragile integrity; inefficient queries over large datasets; no support for concurrency or transactions.
+
+Relational Databases
+
+More complex to set up and maintain; can be heavier resource-wise; rigid schema can be limiting for highly variable/unstructured data (but modern RDBMS and extensions mitigate this).
