@@ -70,6 +70,46 @@ Relational Databases
 
 More complex to set up and maintain; can be heavier resource-wise; rigid schema can be limiting for highly variable/unstructured data (but modern RDBMS and extensions mitigate this).
 
-ANSWER QUESTION 2: 
+ANSWER QUESTION 2:
+ 
 DBMS Advantages DIAGRAM IN FOLDER.
 
+ANSWER QUESTION 3:
+
+Roles in a Database System
+
+System Analyst
+
+Gathers requirements from stakeholders, models business processes, and translates business needs into technical specifications.
+
+Works closely with database designers and application developers to ensure the system meets functional needs.
+
+Database Designer
+
+Designs logical and physical schemas, chooses normalization level, defines tables, keys, indexes, and relationships.
+
+Ensures the model supports performance, integrity, and storage considerations.
+
+Database Developer
+
+Implements database objects: tables, views, stored procedures, functions, triggers, and batch jobs.
+
+Writes and optimizes SQL queries, and collaborates with application developers to integrate the database.
+
+DBA (Database Administrator)
+
+Manages installation, configuration, backups, monitoring, security, and tuning of the DBMS.
+
+Responsible for availability, recovery planning, and applying updates/patches.
+
+Application Developer
+
+Builds the application layer that interacts with the database through APIs/ORMs/SQL queries.
+
+Ensures correct usage of transactions and proper handling of errors and edge cases.
+
+BI Developer (Business Intelligence Developer)
+
+Designs ETL/ELT processes, data warehouses/data marts, cubes, reports, and dashboards.
+
+Translates business questions into data models and reporting artifacts for analytics.
