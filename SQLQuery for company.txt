@@ -1,0 +1,50 @@
+create database companyDB;
+use companyDB
+create table Employee1( 
+ssn int primary key identity(1,1), 
+firstname varchar (30) not null, 
+lastname varchar(30) not null, 
+gender bit default (0), 
+Bdate date, 
+superid int, 
+foreign key (superid) references Employee1 (ssn),
+depnum int,
+foreign key (depnum) references Department (Dnumber )
+) 
+create table Department( 
+Dnumber int primary key identity(1,1), 
+Dname varchar (30) not null, 
+hiringdate date not null, 
+mgrssn int, 
+foreign key (mgrssn) references Employee1 (ssn) 
+) 
+create table Departmentlocation( 
+locations varchar(50) not null, 
+Dnum int, 
+primary key (locations,dnum), 
+foreign key (Dnum) references Department (Dnumber) 
+) 
+create table project(
+pnumber int primary key identity (1,1), 
+pname varchar(30) not null, 
+city varchar(30) not null, 
+location varchar(30) not null, 
+dnum int, 
+foreign key (dnum) references Department (Dnumber) 
+) 
+create table dependent( 
+Bdate date, 
+gender bit default (0), 
+Dname varchar(30) not null, 
+Dssn int, 
+primary key (Dname,Dssn), 
+foreign key (Dssn) references Employee1 (ssn)  
+) 
+create table mywork( 
+pnum int, 
+workssn int, 
+workinghours decimal(4,1), 
+primary key (pnum,workssn), 
+foreign key (pnum) references project (pnumber), 
+foreign key (workssn) references Employee1(ssn) 
+); 
