@@ -92,7 +92,7 @@ values
 ('2015-12-01', 0, 'Layla',    4),
 ('2018-04-18', 1, 'Hassan Jr',1),
 ('2020-07-07', 0, 'Mariam',   5);
--- Verify
+
 
 select * from dependent 
 
