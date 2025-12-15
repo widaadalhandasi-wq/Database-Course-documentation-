@@ -1,0 +1,301 @@
+create database university
+use university
+create table Department(
+D_id int primary key identity(1,1),
+D_name varchar(40) not null
+)
+create table Faculty(
+F_id int primary key identity(1,1),
+F_name varchar(20) not null,
+Mobile_no varchar(15)not null,
+department varchar(15) not null,
+salary decimal (10,2),
+Dep_id int
+foreign key(Dep_id)references Department(D_id)
+)
+create table Hostel(
+Hostel_id int primary key identity(1,1),
+Pin_code varchar(20) not null,
+Number_of_seats int,
+city varchar(30) not null
+)
+
+create table student(
+S_id int primary key identity(1,1),
+F_name varchar (20) not null,
+L_name varchar (20) not null,
+age int,
+Dep_id int,
+foreign key(Dep_id)references Department(D_id),
+Hos_id int,
+foreign key (Hos_id)references Hostel(Hostel_id )
+
+)
+create table faculty_student(
+Fac_id int,
+Stu_id int
+primary key(Fac_id,Stu_id),
+foreign key(Fac_id)references Faculty(F_id),
+foreign key(Stu_id)references student(S_id)
+)
+create table Subject(
+subject_id int primary key identity(1,1),
+subject_name varchar(50) not null,
+Fac_id int,
+foreign key(Fac_id)references Faculty(F_id)
+)
+create table Student_Subject(
+Sub_id int,
+Stu_id int,
+primary key(Sub_id,Stu_id),
+foreign key(Sub_id)references Subject(subject_id),
+foreign key(Stu_id)references student(S_id)
+)
+create table Exams(
+Exam_code int primary key identity(1,1),
+room varchar(30) not null,
+E_date date not null,
+E_time time not null,
+Dep_id int,
+foreign key(Dep_id)references Department(D_id),
+)
+
+create table Student_Exam(
+Ex_code int,
+Stu_id int,
+primary key(Ex_code,Stu_id),
+foreign key(Ex_code)references Exams(Exam_code),
+foreign key(Stu_id)references student(S_id)
+)
+
+create table Course(
+Course_id int primary key identity(1,1),
+Course_name varchar(30) not null,
+Duration int,
+Dep_id int
+foreign key(Dep_id) references Department(D_id)
+)
+create table Student_course(
+Cou_id int,
+Stu_id int,
+primary key(Cou_id,Stu_id),
+foreign key(Cou_id)references Course(Course_id),
+foreign key(Stu_id)references student(S_id)
+)
+
+
+
+INSERT INTO Department (D_name) 
+VALUES
+('Computer Science'),
+('Mathematics');
+select*from Department
+
+INSERT INTO Faculty (F_name,Mobile_no,department,Salary,Dep_id )
+VALUES 
+('Ali', '987654321','HR',5000.00,1),
+('Sara', '912345678','IT', 4500.00,2);
+select*from Faculty
+
+INSERT INTO Hostel (Pin_code, Number_of_seats, City)
+VALUES
+('12345', 100, 'Muscat'),
+('54321', 80, 'Salalah');
+select*from Hostel
+
+INSERT INTO Student (F_name, L_name, Age, Dep_id, Hos_id)
+VALUES ('Ahmed', 'Omar', 20, 1, 1),
+       ('Fatma', 'Khalid', 21, 2, 2);
+select*from Student
+
+INSERT INTO Faculty_Student (Fac_id, Stu_id)
+VALUES (1,1),
+       (2,2);
+select*from Faculty_Student
+
+INSERT INTO Subject (Subject_name, Fac_id)
+VALUES
+('Database', 1),
+ ('Algebra', 2);
+ select*from Subject
+
+ INSERT INTO Student_Subject (Sub_id, Stu_id)
+VALUES (1, 1),
+       (2, 2);
+select*from Student_Subject
+
+INSERT INTO Exams (Room, E_date, E_time, Dep_id)
+VALUES ('A101', '2025-12-20', '09:00', 1),
+       ('B202', '2025-12-21', '10:00', 2);
+
+select*from Exams
+
+INSERT INTO Student_Exam (Ex_code, Stu_id)
+VALUES (1,1),
+       (2,2)
+select*from Student_Exam
+
+INSERT INTO Course (Course_name, Duration, Dep_id)
+VALUES ('BSc CS', 4, 1),
+       ('BSc Math', 3, 2);
+select*from Course
+
+INSERT INTO Student_Course (Cou_id, Stu_id)
+VALUES (1,1),
+       (2,2);
+select*from Student_Course 
+
+----DQL (SELECT) Queries
+----1) Display all student records
+SELECT * FROM Student;
+
+--2)Display each student's full name, enrollment date, and current status
+
+ALTER TABLE Student
+ADD Enrollment_date DATE,
+    Status VARCHAR(20),
+    GPA DECIMAL(10,2);
+
+	-- Example for student S_id = 1
+UPDATE Student
+SET Enrollment_date = '2023-01-15',
+    Status = 'Active',
+    GPA = 3.2
+WHERE S_id = 1;
+
+-- Example for student S_id = 2
+UPDATE Student
+SET Enrollment_date = '2022-09-01',
+    Status = 'Active',
+    GPA = 3.5
+WHERE S_id = 2;
+
+SELECT F_name + ' ' + L_name AS Full_Name, Enrollment_date, Status
+FROM Student;
+
+--3)SELECT Course_title, Credits
+
+SELECT Course_name AS Course_Title, Duration AS Credits
+FROM Course;
+
+---4)Display each student’s full name and GPA as GPA Score
+SELECT 
+F_name + ' ' + L_name AS Full_Name,
+GPA AS GPA_Score
+FROM Student;
+
+----5)List student IDs and names of students with GPA greater than 3.5
+
+SELECT S_id,F_name + ' ' + L_name AS Full_Name
+FROM Student
+WHERE GPA > 3.5;
+
+---6)List students who enrolled before 2022
+
+SELECT F_name + ' ' + L_name AS Full_Name, Enrollment_date
+FROM Student
+WHERE Enrollment_date < '2022-01-01';
+
+---7)Display students with GPA between 3.0 and 3.5
+
+SELECT F_name + ' ' + L_name AS Full_Name, GPA
+FROM Student
+WHERE GPA BETWEEN 3.0 AND 3.5;
+
+--8)Display students ordered by GPA descending
+
+SELECT F_name + ' ' + L_name AS Full_Name, GPA
+FROM Student
+ORDER BY GPA DESC;
+
+---9)Display the maximum, minimum, and average GPA
+
+SELECT MAX(GPA) AS Max_GPA,
+       MIN(GPA) AS Min_GPA,
+       AVG(GPA) AS Avg_GPA
+FROM Student;
+
+---10)Display total number of students
+SELECT COUNT(*) AS Total_Students
+FROM Student;
+
+---11)Display students whose names end with 'a'
+SELECT F_name + ' ' + L_name AS Full_Name
+FROM Student
+WHERE F_name LIKE '%a' OR L_name LIKE '%a';
+
+---12)Display students with NULL advisor
+
+----add Advisor_id
+
+alter table Student
+ADD Advisor_id int 
+
+
+---Example for student S_id = 1
+UPDATE Student
+SET Advisor_id=12
+WHERE S_id = 1
+
+
+-- Example for student S_id = 2
+UPDATE Student
+SET Advisor_id=null
+WHERE S_id = 2
+
+
+---Display students with NULL advisor
+
+SELECT F_name + ' ' + L_name AS Full_Name
+FROM Student
+WHERE Advisor_id IS NULL;
+
+---13)Display students enrolled in 2021
+
+SELECT F_name + ' ' + L_name AS Full_Name, Enrollment_date
+FROM Student
+WHERE YEAR(Enrollment_date) = 2021;
+
+
+
+
+------DML Queries (Insert / Update / Delete)
+
+---14)Insert yourself as a new student
+
+INSERT INTO Student ( F_name, L_name,Age, Dep_id, Hos_id, GPA,Enrollment_date,Status)
+VALUES ('Widaad', 'khalifa',27,2,1,3.53,'2022-02-4' ,'Active');
+
+SELECT * FROM Student;
+
+---15)Insert another student (friend) with GPA and advisor NULL
+
+INSERT INTO Student (F_name, L_name,Age, Dep_id, Hos_id, GPA, Advisor_id,Enrollment_date, Status)
+VALUES ('maya', 'khalifa',25,1,2,3.30, NULL,'2023-04-21' ,'Active');
+
+SELECT * FROM Student;
+
+---delete row (repeted)
+DELETE FROM Student
+WHERE S_id IN (3, 4);
+
+--16)Increase your GPA by 0.2
+UPDATE Student
+SET GPA = GPA + 0.2
+WHERE S_id = 5;
+
+---17)Set GPA to 2.0 for students with GPA below 2.0
+UPDATE Student
+SET GPA = 2.0
+WHERE GPA < 2.0;
+
+--18)Increase GPA by 0.1 for students enrolled before 2020
+UPDATE Student
+SET GPA = GPA + 0.1
+WHERE Enrollment_date < '2020-01-01';
+
+---19)Delete students with status 'Inactive'
+
+DELETE FROM Student
+WHERE Status = 'Inactive';
+
