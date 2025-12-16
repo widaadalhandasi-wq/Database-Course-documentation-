@@ -1,0 +1,339 @@
+CREATE DATABASE BankDB;
+USE BankDB
+
+-- 1. Branch Table
+CREATE TABLE Branch (
+    branch_id INT PRIMARY KEY,
+    street NVARCHAR(100),
+    city NVARCHAR(50),
+    state NVARCHAR(50),
+    zip_code NVARCHAR(10),
+    phone_number NVARCHAR(20)
+);
+-- 2. Position Table (for Employees)
+CREATE TABLE Position (
+    position_id INT PRIMARY KEY,
+    position_name NVARCHAR(50)
+);
+
+-- 3. Employees Table
+CREATE TABLE Employees (
+    employee_id INT PRIMARY KEY,
+    name NVARCHAR(100),
+    pos_id INT,
+    bran_id INT,
+    FOREIGN KEY (pos_id) REFERENCES Position(position_id),
+    FOREIGN KEY (bran_id) REFERENCES Branch(branch_id)
+);
+
+-- 4. Customers Table
+
+CREATE TABLE Customers (
+    customer_id INT PRIMARY KEY,
+    name NVARCHAR(100),
+    phone_number NVARCHAR(20),
+    street NVARCHAR(100),
+    city NVARCHAR(50),
+    state NVARCHAR(50),
+    zip_code NVARCHAR(10),
+    date_of_birth DATE
+);
+
+-- 5. AccountType Table
+
+CREATE TABLE AccountType (
+    account_type_id INT PRIMARY KEY,
+    type_name NVARCHAR(20)
+);
+
+-- 6. Account Table
+
+CREATE TABLE Account (
+    account_no INT PRIMARY KEY,
+    balance DECIMAL(18,2),
+    date_of_creation DATE,
+    acc_type_id INT,
+    cust_id INT,
+    FOREIGN KEY (acc_type_id) REFERENCES AccountType(account_type_id),
+    FOREIGN KEY (cust_id) REFERENCES Customers(customer_id)
+);
+
+-- 7. TransactionType Table
+
+CREATE TABLE TransactionType (
+    transaction_type_id INT PRIMARY KEY,
+    type_name NVARCHAR(20)
+);
+
+-- 8. Transactions Table
+
+CREATE TABLE Transactions (
+    transaction_id INT PRIMARY KEY,
+    acc_no INT,
+    transaction_date DATE,
+    amount DECIMAL(18,2),
+    tran_type_id INT,
+    FOREIGN KEY (acc_no) REFERENCES Account(account_no),
+    FOREIGN KEY (tran_type_id) REFERENCES TransactionType(transaction_type_id)
+);
+
+-- 9. LoanType Table
+
+CREATE TABLE LoanType (
+    loan_type_id INT PRIMARY KEY,
+    type_name NVARCHAR(50)
+);
+
+-- 10. Loans Table
+
+CREATE TABLE Loans (
+    loan_id INT PRIMARY KEY,
+    lo_type_id INT,
+    issue_date DATE,
+    amount DECIMAL(18,2),
+    cus_id INT,
+    emp_id INT,
+    FOREIGN KEY (lo_type_id) REFERENCES LoanType(loan_type_id),
+    FOREIGN KEY (cus_id) REFERENCES Customers(customer_id),
+    FOREIGN KEY (emp_id) REFERENCES Employees(employee_id)
+);
+
+-- 11. ActionType Table
+
+CREATE TABLE ActionType (
+    action_type_id INT PRIMARY KEY,
+    action_name NVARCHAR(50)
+);
+
+-- 12. EmployeeCustomerAction Table
+
+CREATE TABLE EmployeeCustomerAction (
+    action_id INT PRIMARY KEY,
+    action_date DATE,
+    cus_id INT,
+    emp_id INT,
+    act_type_id INT,
+    FOREIGN KEY (cus_id) REFERENCES Customers(customer_id),
+    FOREIGN KEY (emp_id) REFERENCES Employees(employee_id),
+    FOREIGN KEY (act_type_id) REFERENCES ActionType(action_type_id)
+);
+-- 1. Branch Table
+INSERT INTO Branch (branch_id, street, city, state, zip_code, phone_number) 
+VALUES
+(1, '123 Main St', 'Muscat', 'Muscat', '1001', '24567890'),
+(2, '456 Al Azaiba', 'Muscat', 'Muscat', '1002', '24567891');
+select*from Branch
+
+-- 2. Position Table
+INSERT INTO Position (position_id, position_name) 
+VALUES
+(1, 'Manager'),
+(2, 'Teller'),
+(3, 'Loan Officer');
+select*from Position
+ ---3-Employees Table
+
+ INSERT INTO Employees (employee_id, name, pos_id, bran_id) VALUES
+(1, 'Ahmed Ali', 1, 1),
+(2, 'Fatma Saleh', 2, 1),
+(3, 'Omar Hassan', 3, 2);
+select*from Employees 
+
+--4. Customers Table
+
+INSERT INTO Customers (customer_id, name, phone_number, street, city, state, zip_code, date_of_birth) VALUES
+(1, 'Sara Khalid', '90123456', '10 Al Khuwair', 'Muscat', 'Muscat', '1101', '1990-05-12'),
+(2, 'Mohammed Said', '90123457', '20 Bausher', 'Muscat', 'Muscat', '1102', '1985-03-20');
+select*from Customers
+-- 5. AccountType Table
+
+INSERT INTO AccountType (account_type_id, type_name) VALUES
+(1, 'Savings'),
+(2, 'Checking');
+select*from AccountType
+-- 6. Account Table
+
+INSERT INTO Account (account_no, balance, date_of_creation, acc_type_id, cust_id) 
+VALUES
+(1001, 5000.00, '2025-01-01', 1, 1),
+(1002, 15000.50, '2025-02-10', 2, 2);
+select*from Account
+-- 7. TransactionType Table
+
+INSERT INTO TransactionType (transaction_type_id, type_name) 
+VALUES
+(1, 'Deposit'),
+(2, 'Withdrawal'),
+(3, 'Transfer');
+select*from TransactionType 
+-- 8. Transactions Table
+
+INSERT INTO Transactions (transaction_id, acc_no, transaction_date, amount, tran_type_id) 
+VALUES
+(1, 1001, '2025-03-01', 2000.00, 1),
+(2, 1002, '2025-03-02', 500.00, 2);
+select*from Transactions
+-- 9. LoanType Table
+
+INSERT INTO LoanType (loan_type_id, type_name) VALUES
+(1, 'Home Loan'),
+(2, 'Car Loan'),
+(3, 'Personal Loan');
+select*from LoanType 
+-- 10. Loans Table
+
+INSERT INTO Loans (loan_id, lo_type_id, issue_date, amount, cus_id, emp_id) 
+VALUES
+(1, 1, '2025-01-15', 100000.00, 2, 3),
+(2, 2, '2025-02-20', 25000.00, 1, 3);
+select*from Loans
+-- 11. ActionType Table
+
+INSERT INTO ActionType (action_type_id, action_name) 
+VALUES
+(1, 'Open Account'),
+(2, 'Process Loan');
+select*from ActionType
+
+-- 12. EmployeeCustomerAction Table
+
+INSERT INTO EmployeeCustomerAction (action_id, action_date, cus_id, emp_id, act_type_id) 
+VALUES
+(1, '2025-01-01', 1, 2, 1),
+(2, '2025-02-20', 2, 3, 2);
+
+select*from EmployeeCustomerAction
+
+----DQL Queries
+-- 1. Display all customer records
+SELECT * FROM Customers;
+
+-- 2. Display customer full name, phone, and membership start date (first account date)
+SELECT name AS FullName,
+       phone_number,
+       (SELECT MIN(date_of_creation) 
+        FROM Account 
+        WHERE customer_id = Customers.customer_id) AS MembershipStartDate
+FROM Customers;
+
+-- 3. Display each loan ID, amount, and type
+SELECT loan_id,amount,
+       (SELECT type_name FROM LoanType WHERE loan_type_id = Loans.lo_type_id) AS LoanType
+FROM Loans;
+
+
+-- 4. Display account number and annual interest (5% of balance)
+SELECT account_no,
+       balance * 0.05 AS AnnualInterest
+FROM Account;
+
+
+-- 5. List customers with loan amounts greater than 100000 LE
+SELECT DISTINCT customer_id,
+       name
+FROM Customers
+WHERE customer_id IN (SELECT customer_id FROM Loans WHERE amount > 100000);
+
+
+-- 6. List accounts with balances above 20000
+SELECT account_no, balance
+FROM Account
+WHERE balance > 20000;
+
+
+-- 7. Display accounts opened in 2023
+SELECT account_no, date_of_creation
+FROM Account
+WHERE YEAR(date_of_creation) = 2023;
+
+-- 8. Display accounts ordered by balance descending
+SELECT account_no, balance
+FROM Account
+ORDER BY balance DESC;
+
+
+-- 9. Display maximum, minimum, and average account balance
+SELECT MAX(balance) AS MaxBalance,
+       MIN(balance) AS MinBalance,
+       AVG(balance) AS AvgBalance
+FROM Account;
+
+
+-- 10. Display total number of customers
+SELECT COUNT(*) AS TotalCustomers
+FROM Customers;
+
+
+-- 11. Display customers with NULL phone numbers
+SELECT customer_id, name
+FROM Customers
+WHERE phone_number IS NULL;
+
+
+-- 12. Display loans with duration greater than 10 years
+-- Assuming "duration" is from issue_date to today
+
+SELECT loan_id, amount,
+       (SELECT type_name FROM LoanType WHERE loan_type_id = Loans.lo_type_id) AS LoanType
+FROM Loans
+WHERE DATEDIFF(YEAR, issue_date, GETDATE()) > 10;
+
+
+	   -----DML Queries
+
+-- 13. Insert yourself as a new customer and open an account with balance 10000
+
+INSERT INTO Customers (customer_id, name, phone_number, street, city, state, zip_code, date_of_birth)
+VALUES (3, 'Widaad', '98993173', '50 Albedaya', 'Alsuwaiq', 'North Albatina', '315', '1998-07-20');
+
+INSERT INTO Account (account_no, balance, date_of_creation, acc_type_id, cust_id)
+VALUES (1003, 10000.00, GETDATE(), 1, 3);
+
+
+-- 14. Insert another customer with NULL phone and address
+INSERT INTO Customers (customer_id, name, phone_number, street, city, state, zip_code, date_of_birth)
+VALUES (4, 'maya', NULL, NULL, NULL, NULL, NULL, '1992-07-15');
+
+-- 15. Increase your account balance by 20%
+UPDATE Account
+SET balance = balance * 1.2
+WHERE cust_id = 3;
+
+
+-- 16. Increase balance by 5% for accounts with balance less than 5000
+UPDATE Account
+SET balance = balance * 1.05
+WHERE balance < 5000;
+
+
+-- 17. Update phone number to 'Not Provided' where phone is NULL
+UPDATE Customers
+SET phone_number = 'Not Provided'
+WHERE phone_number IS NULL;
+
+
+-- 18. Delete closed accounts
+
+--1. Add status column to Account table
+ALTER TABLE Account
+ADD status NVARCHAR(20) DEFAULT 'Open';
+
+
+---2. Update some accounts to 'Closed' (for testing)
+
+UPDATE Account
+SET status = 'Closed'
+WHERE account_no = 1002;        -- example: closing account number 1002
+
+select*from  Account
+
+
+-- Delete transactions for closed accounts
+DELETE FROM Transactions
+WHERE acc_no IN (SELECT account_no FROM Account WHERE status = 'Closed');
+
+-- Now delete closed accounts
+DELETE FROM Account
+WHERE status = 'Closed';
+
+select*from  Account
