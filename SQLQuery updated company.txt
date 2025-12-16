@@ -1,0 +1,103 @@
+create database TrainingcompanyDB;
+use TrainingcompanyDB
+create table Employee1(  
+ssn int primary key identity(1,1),  
+firstname nvarchar (30) not null,  
+lastname nvarchar(30) not null,  
+gender bit default (0),  
+Bdate date,  
+superid int,  
+foreign key(superid)references Employee1(ssn)
+)
+create table Department(  
+Dnumber int primary key identity(1,1),  
+Dname nvarchar (30) not null,  
+hiringdate date not null,  
+mgrssn int,  
+foreign key(mgrssn)references Employee1 (ssn)  
+)
+--alter table for employee
+alter table Employee1 
+add depnum int foreign key(depnum)references Department(Dnumber )
+
+create table Departmentlocation(  
+locations nvarchar(50) not null,  
+Dnum int,  
+primary key (locations,Dnum),  
+foreign key(Dnum)references Department(Dnumber)  
+)
+create table project( 
+pnumber int primary key identity (1,1),  
+pname nvarchar(30) not null,  
+city varchar(30) not null,  
+Plocation nvarchar(30) not null,  
+dnum int,  
+foreign key(dnum)references Department(Dnumber)  
+) 
+create table dependent(  
+Bdate date,  
+gender bit default (0),  
+Dname nvarchar(30) not null,  
+Dssn int,  
+primary key (Dname,Dssn),  
+foreign key (Dssn) references Employee1 (ssn) 
+)
+create table mywork(  
+pnum int,  
+workssn int,  
+workinghours int not null, 
+primary key (pnum,workssn),  
+foreign key(pnum)references project(pnumber),  
+foreign key(workssn)references Employee1(ssn)  
+);
+--insert table
+insert into Employee1 (firstname, lastname, gender, Bdate, superid)
+values
+('Ali', 'Hassan', 1, '1985-03-12', null),
+('Sara', 'Omar', 0, '1990-07-25', 1),
+('Khalid', 'Nasser', 1, '1988-11-05', 1),
+('Fatima', 'Salim', 0, '1992-02-14', 2),
+('Yusuf', 'Rahman', 1, '1995-09-09', 3);
+select*from Employee1;
+insert into Department (Dname, hiringdate, mgrssn)
+values
+('HR', '2015-01-01', 2),
+('IT', '2016-06-15', 3),
+('Finance', '2017-09-20', 1),
+('Marketing', '2018-03-10', 4),
+('Operations', '2019-07-22', 5);
+select*from Department;
+
+insert into Departmentlocation (locations, Dnum)
+values
+('Muscat', 1),
+('Sohar', 2),
+('Nizwa', 3),
+('Salalah', 4),
+('Sur', 5);
+select*from Departmentlocation;
+insert into Project (pname, city, Plocation, dnum)
+values
+('Payroll System', 'Muscat', 'HQ', 3),
+('Website Upgrade', 'Sohar', 'Tech Park', 2),
+('Recruitment Drive', 'Muscat', 'HR Center', 1),
+('Ad Campaign', 'Salalah', 'Marketing Hub', 4),
+('Logistics Optimization', 'Sur', 'Ops Base', 5);
+select*from Project;
+insert into dependent (Bdate, gender,Dname, Dssn)
+values
+('2010-05-10', 0, 'Aisha',    2),
+('2012-08-22', 1, 'Omar Jr',  3),
+('2015-12-01', 0, 'Layla',    4),
+('2018-04-18', 1, 'Hassan Jr',1),
+('2020-07-07', 0, 'Mariam',   5);
+select * from dependent 
+insert into MyWork (pnum, workssn, workinghours)
+values
+(1, 1, 20.5),
+(2, 3, 35.0),
+(3, 2, 15.0),
+(4, 4, 25.0),
+(5, 5, 30.0);
+
+select*from MyWork ;
