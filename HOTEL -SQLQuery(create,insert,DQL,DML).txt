@@ -1,0 +1,326 @@
+create database HotelDB
+use HotelDB
+-- Branch Table
+CREATE TABLE Branch (
+    Branch_id INT PRIMARY KEY identity (1,1),
+    Name NVARCHAR(100) NOT NULL,
+    Location NVARCHAR(100) NOT NULL
+);
+
+-- Rooms Table
+CREATE TABLE Room (
+    Room_no INT PRIMARY KEY identity (100,1),
+    Type NVARCHAR(50) NOT NULL,
+    Nightly_rate DECIMAL(10,2),
+    B_id INT ,
+    FOREIGN KEY (B_id) REFERENCES Branch(Branch_id)
+);
+
+-- Staff Table
+CREATE TABLE Staff (
+    Staff_id INT PRIMARY KEY identity (1,1),
+    Name NVARCHAR(100) NOT NULL,
+    Salary DECIMAL(10,2) NOT NULL,
+    Job_title NVARCHAR(50),
+    B_id INT ,
+    FOREIGN KEY (B_id) REFERENCES Branch(Branch_id)
+);
+
+-- Customer Table
+CREATE TABLE Customer (
+    Customer_id INT PRIMARY KEY identity (1,1),
+    Name NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100) UNIQUE,
+    Phone NVARCHAR(20)
+);
+
+-- Booking Table
+CREATE TABLE Booking (
+    Booking_id INT PRIMARY KEY identity (1,1),
+    Cus_id INT ,
+    Check_in_date DATE NOT NULL,
+    Check_out_date DATE NOT NULL,
+    FOREIGN KEY (Cus_id) REFERENCES Customer(Customer_id)
+);
+
+-- Booking_Room Table
+CREATE TABLE Booking_Room (
+    Book_id INT NOT NULL,
+    R_no INT NOT NULL,
+    PRIMARY KEY (Book_id, R_no),
+    FOREIGN KEY (Book_id) REFERENCES Booking(Booking_id),
+    FOREIGN KEY (R_no) REFERENCES Room(Room_no),
+);
+
+-- Staff_Action Table
+CREATE TABLE Staff_Action (
+    Action_id INT PRIMARY KEY identity (1,1),
+    Action_type NVARCHAR(50) NOT NULL,
+    Action_date_time DATETIME NOT NULL,
+    Staf_id INT NOT NULL,
+    Book_id INT NOT NULL,
+    FOREIGN KEY (Staf_id) REFERENCES Staff(Staff_id),
+    FOREIGN KEY (Book_id) REFERENCES Booking(Booking_id)
+);
+
+
+---insert
+
+---brabch
+INSERT INTO Branch (Name, Location)
+VALUES 
+('Downtown Hotel', 'New York'),
+('Airport Hotel', 'Los Angeles'),
+('Beachside Resort', 'Miami');
+
+select*from Branch 
+---room
+
+INSERT INTO Room (Type, Nightly_rate, B_id) 
+VALUES
+('Single', 100.00, 1),
+('Double', 150.00, 1),
+('Suite', 250.00, 1),
+( 'Single', 120.00, 2)
+select*from Room 
+---staff
+
+INSERT INTO Staff (Name, Salary, Job_title, B_id)
+VALUES
+('Alice Smith', 3000.00, 'Manager', 1),
+( 'Bob Johnson', 2000.00, 'Receptionist', 1),
+( 'Catherine Lee', 2800.00, 'Manager', 2),
+('David Brown', 2200.00, 'Receptionist', 2),
+('Eva Green', 3200.00, 'Manager', 3);
+select*from Staff
+---Customers
+
+INSERT INTO Customer (Name, Email, Phone) 
+VALUES
+('John Doe', 'john@example.com', '123-456-7890'),
+('Jane Roe', 'jane@example.com', '987-654-3210'),
+('Michael Smith', 'michael@example.com', '555-123-4567'),
+( 'Sarah Connor', 'sarah@example.com', '555-987-6543');
+select*from Customer 
+
+---Bookings
+
+INSERT INTO Booking (Cus_id, Check_in_date, Check_out_date) 
+VALUES
+( 1, '2025-12-20', '2025-12-25'),
+( 2, '2025-12-21', '2025-12-23'),
+(3, '2025-12-22', '2025-12-28'),
+(4, '2025-12-23', '2025-12-26');
+select*from Booking 
+
+
+---Booking_Room
+
+INSERT INTO Booking_Room (Book_id, R_no) 
+VALUES
+(1, 100),
+(1, 101),
+(2, 102),
+(3, 103);
+
+select*from Booking_Room
+
+----Staff_Action
+
+INSERT INTO Staff_Action ( Action_type, Action_date_time, Staf_id, Book_id) 
+VALUES
+('Check-in', '2025-12-20 14:00', 2, 1),
+( 'Room Cleaning', '2025-12-21 10:00', 2, 1),
+( 'Check-in', '2025-12-21 15:00', 4, 2),
+( 'Room Cleaning', '2025-12-22 09:00', 4, 2),
+('Check-in', '2025-12-22 13:00', 5, 3),
+( 'Room Cleaning', '2025-12-23 11:00', 5, 3),
+('Check-in', '2025-12-23 16:00', 5, 4);
+
+select*from Staff_Action 
+
+
+----DQL Tasks
+
+----1-isplay all customer records
+SELECT * FROM Customer;
+
+---2-Display each customer’s name, contact number, and proof ID type
+SELECT Name, Phone,Customer_id 
+FROM Customer;
+
+----3-Display all bookings with booking date, status, and total cost
+
+-----alter  Booking_date, Status, Total_cost
+
+ALTER TABLE Booking
+ADD Booking_date DATE DEFAULT GETDATE(),
+    Status NVARCHAR(20) DEFAULT 'Pending',
+    Total_cost DECIMAL(10,2) DEFAULT 0.00;
+
+	select*from Booking
+
+	--- update values for  Booking_date, Status, Total_cost
+
+	UPDATE Booking
+SET Booking_date = '2025-12-10',
+    Status = 'Pending',
+    Total_cost = 1200.00
+WHERE Booking_id = 1;
+
+UPDATE Booking
+SET Booking_date = '2025-12-11',
+    Status = 'Confirmed',
+    Total_cost = 1800.00
+WHERE Booking_id = 2;
+
+UPDATE Booking
+SET Booking_date = '2025-12-12',
+    Status = 'Pending',
+    Total_cost = 2500.00
+WHERE Booking_id = 3;
+
+UPDATE Booking
+SET Booking_date = '2025-12-13',
+    Status = 'Cancelled',
+    Total_cost = 2000.00
+WHERE Booking_id = 4;
+
+
+---then 
+SELECT Booking_id, Booking_date, Status, Total_cost
+FROM Booking;
+
+
+----4-Display each room number and its price per night as NightlyRate
+
+SELECT Room_no, Nightly_rate AS NightlyRate
+FROM Room;
+
+--5-List rooms priced above 1000 per night
+
+SELECT Room_no, Nightly_rate
+FROM Room
+WHERE Nightly_rate > 1000;
+
+--6-Display staff members working as 'Receptionist'
+
+SELECT Name, Job_title, B_id
+FROM Staff
+WHERE Job_title = 'Receptionist';
+
+
+---7-Display bookings made in 2024
+SELECT *
+FROM Booking
+WHERE YEAR(Booking_date) = 2024;
+
+
+----8-Display bookings ordered by total cost descending
+SELECT *
+FROM Booking
+ORDER BY Total_cost DESC;
+
+---9-Display the maximum, minimum, and average room price
+SELECT MAX(Nightly_rate) AS MaxPrice,
+       MIN(Nightly_rate) AS MinPrice,
+       AVG(Nightly_rate) AS AvgPrice
+FROM Room;
+
+---10-Display total number of rooms
+SELECT COUNT(*) AS TotalRooms
+FROM Room;
+
+--11-Display customers whose names start with 'M'
+SELECT *
+FROM Customer
+WHERE Name LIKE 'M%';
+
+--12-Display rooms priced between 800 and 1500
+
+SELECT *
+FROM Room
+WHERE Nightly_rate BETWEEN 800 AND 1500;
+
+
+----DML Tasks
+
+--13. Insert yourself as a customer (customer ID = 9011).
+
+-- Enable explicit insertion into Customer_id
+SET IDENTITY_INSERT Customer ON;
+
+INSERT INTO Customer (Customer_id, Name, Email, Phone)
+VALUES
+(9011, 'Widaad', 'widaad@gmail.com', '98993173');
+
+---to show the result
+select*from Customer
+
+-- Turn it off after insert
+SET IDENTITY_INSERT Customer OFF;
+
+
+-----14-Create a booking for room 205.
+
+-- Enable explicit insertion into room 205.
+SET IDENTITY_INSERT Room ON;
+
+-- Enable explicit insertion into
+INSERT INTO Room (Room_no, Type, Nightly_rate, B_id)
+VALUES (205, 'Single', 1200.00, 2);
+
+------to show the result
+select*from Room
+
+-- Turn it off after insert
+SET IDENTITY_INSERT Room OFF;
+
+
+---15. Insert another customer with NULL contact and proof details.
+
+INSERT INTO Customer (Name,Email, Phone)
+VALUES ('khalid','khalid@gmail.com', NULL);
+---to show the result
+select*from Customer
+
+
+---16. Update your booking status to 'Confirmed'.
+
+UPDATE Booking
+SET Status = 'Confirmed'
+WHERE Cus_id = 9011;
+
+select*from Booking
+
+----17. Increase room prices by 10% for luxury rooms.
+
+UPDATE Room
+SET Nightly_rate = Nightly_rate * 1.10
+WHERE Type = 'Luxury';
+select*from Room
+
+
+---18. Update booking status to 'Completed' where checkout date is before today.
+UPDATE Booking
+SET Status = 'Completed'
+WHERE Check_out_date < GETDATE();
+
+select*from Booking
+
+
+---19. Delete bookings with status 'Cancelled'.
+
+-- Delete related staff actions for cancelled bookings
+DELETE FROM Staff_Action
+WHERE Book_id IN (
+    SELECT Booking_id
+    FROM Booking
+    WHERE Status = 'Cancelled'
+);
+
+-- Now delete cancelled bookings
+DELETE FROM Booking
+WHERE Status = 'Cancelled';
+
+select*from Booking
