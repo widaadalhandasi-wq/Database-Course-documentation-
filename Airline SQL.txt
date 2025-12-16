@@ -1,0 +1,299 @@
+create database AirlineDB
+use AirlineDB
+CREATE TABLE Airport (
+    Airport_Code VARCHAR(10) PRIMARY KEY,
+    Airpor_Name VARCHAR(100) not null,
+    City VARCHAR(50),
+    State VARCHAR(50)
+);
+
+CREATE TABLE AirplaneType (
+    TypeName VARCHAR(50) PRIMARY KEY,
+    Company VARCHAR(50),
+    MaxSeats INT
+);
+
+CREATE TABLE Airplane (
+    Airplane_ID INT PRIMARY KEY identity(1,1),
+    Total_Seats INT,
+    T_Name VARCHAR(50),
+    FOREIGN KEY (T_Name) REFERENCES AirplaneType(TypeName)
+);
+
+CREATE TABLE Flight (
+    Flight_No INT PRIMARY KEY identity(1,1),
+    Restriction VARCHAR(100),
+    Weekdays VARCHAR(50),
+    Airline VARCHAR(50)
+);
+
+CREATE TABLE FlightLeg (
+    Leg_No INT PRIMARY KEY identity(1,1),
+    DepAirportCode VARCHAR(10),
+    ArrAirportCode VARCHAR(10),
+    ScheduledDepTime TIME,
+    ScheduledArrTime TIME,
+    F_ID INT,
+    FOREIGN KEY (F_ID) REFERENCES Flight(Flight_No),
+    FOREIGN KEY (DepAirportCode) REFERENCES Airport(Airport_Code),
+    FOREIGN KEY (ArrAirportCode) REFERENCES Airport(Airport_Code)
+);
+
+CREATE TABLE Fare (
+    FareCode VARCHAR(10) PRIMARY KEY,
+    Amount DECIMAL(10,2),
+    FL_No INT,
+    FOREIGN KEY (FL_No) REFERENCES FlightLeg(Leg_No)
+);
+
+CREATE TABLE LegInstance (
+    LegInstanceID INT PRIMARY KEY ,                     ---LegInstanceID(fligh_no+date)
+    LegNo INT,
+    DepartureTime DATETIME,
+    ArrivalTime DATETIME,
+    AvailableSeats INT,
+    AirplaneID INT,
+    FOREIGN KEY (LegNo) REFERENCES FlightLeg(Leg_No),
+    FOREIGN KEY (AirplaneID) REFERENCES Airplane(Airplane_ID)
+);
+
+CREATE TABLE Reservation (
+    ReservationID INT PRIMARY KEY identity(1,1),
+    SeatNumber VARCHAR(5),
+    CustomerName VARCHAR(100) not null,
+    CustomerPhone VARCHAR(20) not null,
+    Leg_InstanceID INT,
+    FOREIGN KEY (Leg_InstanceID) REFERENCES LegInstance(LegInstanceID)
+);
+
+CREATE TABLE AirportAirplaneType (
+    AirportCode VARCHAR(10),
+    Type_Name VARCHAR(50),
+    PRIMARY KEY (AirportCode, Type_Name),
+    FOREIGN KEY (AirportCode) REFERENCES Airport(Airport_Code),
+    FOREIGN KEY (Type_Name) REFERENCES AirplaneType(TypeName)
+);
+
+---insert 
+
+INSERT INTO Airport(Airport_Code,Airpor_Name, City , State)
+VALUES
+('MCT', 'Muscat Intl', 'Muscat', 'Oman'),
+('DXB', 'Dubai Intl', 'Dubai', 'UAE');
+select*from Airport
+
+INSERT INTO AirplaneType (TypeName,  Company,  MaxSeats)
+VALUES
+('A320', 'Airbus', 180),
+('B737', 'Boeing', 160);
+
+select*from AirplaneType
+
+INSERT INTO Airplane(Total_Seats,T_Name)
+VALUES
+(180, 'A320'),
+(160, 'B737');
+select*from Airplane
+
+
+INSERT INTO Flight (Restriction, Weekdays,Airline)
+VALUES
+('No restriction', 'Sun,Mon,Wed', 'Oman Air');
+select*from Flight
+
+INSERT INTO FlightLeg (DepAirportCode,ArrAirportCode,ScheduledDepTime,ScheduledArrTime,F_ID)
+VALUES
+( 'MCT', 'DXB', '08:00', '09:30',1);
+select*from FlightLeg
+
+INSERT INTO Fare (FareCode,Amount,FL_No)
+VALUES
+('F1',120.00, 2),
+( 'F2',150.00, 2);
+
+select*from Fare 
+
+INSERT INTO LegInstance( LegInstanceID,LegNo,DepartureTime,ArrivalTime, AvailableSeats, AirplaneID)
+VALUES
+(10, 1, '2025-01-10 08:05', '2025-01-10 09:35', 50, 1);
+select*from LegInstance
+
+INSERT INTO Reservation ( SeatNumber,CustomerName, CustomerPhone,Leg_InstanceID)
+VALUES
+('12A', 'Ahmed Ali', '99887766', 10);
+select*from Reservation
+
+INSERT INTO AirportAirplaneType ( AirportCode,Type_Name)
+VALUES
+('MCT', 'A320'),
+('DXB', 'A320'),
+('DXB', 'B737');
+select*from AirportAirplaneType
+
+-----DQL
+---1)Display all flight leg records
+
+SELECT * FROM FlightLeg;
+
+----2)Display each flight leg ID, scheduled departure time, and arrival time
+
+SELECT Leg_No, ScheduledDepTime, ScheduledArrTime
+FROM FlightLeg;
+
+----3)Display each airplane’s ID, type, and seat capacity
+
+SELECT 
+    Airplane_ID,
+    T_Name,
+    (SELECT MaxSeats 
+     FROM AirplaneType 
+     WHERE AirplaneType.TypeName = Airplane.T_Name) AS SeatCapacity
+FROM Airplane;
+
+
+---4)Display each flight leg’s ID and available seats as AvailableSeats
+
+SELECT 
+    Leg_No,
+    (SELECT AvailableSeats 
+     FROM LegInstance 
+     WHERE LegInstance.LegNo = FlightLeg.Leg_No) AS AvailableSeats
+FROM FlightLeg;
+
+
+---5)List flight leg IDs with available seats greater than 100
+SELECT Leg_No
+FROM FlightLeg
+WHERE Leg_No IN (
+    SELECT LegNo
+    FROM LegInstance
+    WHERE AvailableSeats > 100
+);
+
+
+---6)List airplane IDs with seat capacity above 300
+
+SELECT Airplane_ID
+FROM Airplane
+WHERE T_Name IN (
+    SELECT TypeName
+    FROM AirplaneType
+    WHERE MaxSeats > 300
+);
+
+
+---7)Display airport codes and names where city = 'Cairo'
+SELECT Airport_Code,Airpor_Name
+FROM Airport
+WHERE City = 'Cairo';
+
+--8)Display flight legs scheduled on 2025-06-10
+SELECT Leg_No
+FROM FlightLeg
+WHERE Leg_No IN (
+    SELECT LegNo
+    FROM LegInstance
+    WHERE CAST(DepartureTime AS DATE) = '2025-06-10'
+);
+
+
+---9) Display flight legs ordered by departure time
+SELECT LegNo
+FROM LegInstance
+ORDER BY DepartureTime;
+
+---10)Display maximum, minimum, and average available seats
+
+SELECT 
+    MAX(AvailableSeats) AS MaxSeats,
+    MIN(AvailableSeats) AS MinSeats,
+    AVG(AvailableSeats) AS AvgSeats
+FROM LegInstance;
+
+---11). Display total number of flight legs
+SELECT COUNT(*) AS TotalFlightLegs
+FROM FlightLeg;
+
+---12). Display airplanes whose type contains 'Boeing'
+SELECT Airplane_ID
+FROM Airplane
+WHERE T_Name IN (
+    SELECT TypeName
+    FROM AirplaneType
+    WHERE Company LIKE '%Boeing%'
+);
+
+----DML
+
+---13). Insert a new flight leg departing from 'CAI' to 'DXB' on 2025-06-10
+
+INSERT INTO Airport (Airport_Code, Airpor_Name, City, State)
+VALUES
+('CAI', 'Cairo International Airport', 'Cairo', 'Egypt');
+
+INSERT INTO FlightLeg
+VALUES ('CAI', 'DXB', '09:00', '12:00',1);
+
+INSERT INTO LegInstance
+VALUES (300,1, '2025-06-10 09:00', '2025-06-10 12:00', 150, 1);
+
+-----to show the result for above
+SELECT * FROM Airport;
+SELECT * FROM FlightLeg;
+SELECT * FROM LegInstance
+
+---14.) Insert a customer with NULL contact number
+
+---- CustomerPhone is not null in table , so firsy i change the constraint to null
+
+alter table Reservation
+ALTER COLUMN CustomerPhone VARCHAR(20) NULL;
+
+INSERT INTO Reservation
+VALUES ('18C', 'Mohammed Ali', NULL, 300);
+
+SELECT * FROM Reservation
+
+
+---15)Reduce available seats of your inserted flight leg by 5
+UPDATE LegInstance
+SET AvailableSeats = AvailableSeats - 5
+WHERE LegInstanceID = 300;
+
+
+---16) Increase available seats by 10 for all domestic flights
+UPDATE LegInstance
+SET AvailableSeats = AvailableSeats + 10
+WHERE LegNo IN (
+    SELECT LegNo
+    FROM FlightLeg
+    WHERE DepAirportCode IN (
+        SELECT Airport_Code
+        FROM Airport
+        WHERE City IN (
+            SELECT City
+            FROM Airport
+            WHERE Airport_Code = FlightLeg.ArrAirportCode
+        )
+    )
+);
+
+SELECT * FROM LegInstance
+
+---17)Update airplane seat capacity by +20 where capacity < 150
+
+UPDATE AirplaneType
+SET MaxSeats = MaxSeats + 20
+WHERE MaxSeats < 150;
+
+
+----18). Delete canceled flight legs
+DELETE FROM FlightLeg
+WHERE Leg_No IN (
+    SELECT LegNo
+    FROM LegInstance
+    WHERE AvailableSeats =0
+);
+SELECT * FROM FlightLeg;
+
+
