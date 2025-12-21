@@ -1,0 +1,163 @@
+﻿use university
+--1. Display the department ID, name, and the full name of the faculty managing it.
+
+select d.D_id, d.D_name, F.F_name as managername
+from Department d
+inner join Faculty f
+on d.D_id = f.Dep_id;
+
+
+--2. Display each program's name and the name of the department offering it. 
+
+
+select c.Course_name, d.D_name
+from Course c
+inner join department d 
+on d.D_id = c.Dep_id;
+
+
+
+---3. Display the full student data and the full name of their faculty advisor. 
+
+
+select s.*, f.F_name as advisorname
+from student s
+left join faculty f 
+on s.S_id = f.F_id;
+
+
+
+--4. Display class IDs, course titles, and room locations for classes in buildings 'A' or 'B'. 
+
+select 
+    e.Exam_code as class_id,
+    c.Course_name as course_title,
+    e.room
+from Exams e
+inner join Course c
+ on c.Dep_id = e.Dep_id
+where e.room like 'A%' or e.room like 'B%';
+
+
+
+--5. Display full data about courses whose titles start with "I" (e.g., "Introduction to..."). 
+
+select *
+from course
+where course_name like 'I%';      ---no course start with I
+
+
+--6. Display names of students in program ID 3 whose GPA is between 2.5 and 3.5. 
+
+select 
+    s.F_name + ' ' + s.L_name as full_name,
+    s.GPA
+from student s
+inner join student_course sc
+    on s.s_id = sc.stu_id
+where sc.cou_id = 3
+  and s.GPA between 2.5 and 3.5;    --no course-id(3) with this GPA
+
+
+--7. Retrieve student names in the Engineering program who earned grades ≥ 90 in the "Database" course. 
+
+
+--Add a grade column
+alter table student_subject
+add grade decimal(5,2);          -- grade out of 100
+
+--Update grades for some students
+update student_subject
+set grade = 95
+where sub_id = 1 and stu_id = 1;
+
+update student_subject
+set grade = 88
+where sub_id = 2 and stu_id = 2;
+
+update student_subject
+set grade = 98
+where sub_id = 3 and stu_id = 3;
+
+-----update the Engineering department
+update department
+set d_name = 'engineering'
+where d_id = 1;
+
+
+select 
+    s.f_name + ' ' + s.l_name as full_name
+from student s
+inner join student_subject ss
+    on s.s_id = ss.stu_id
+inner join subject sub
+    on ss.sub_id = sub.subject_id
+where sub.subject_name = 'database'
+  and ss.grade >= 90
+  and s.dep_id = (select d_id from department where d_name = 'engineering');
+
+
+
+--8. Find names of students who are advised by "Dr. Ahmed Hassan". 
+
+--insert into faculty
+insert into faculty (f_name, mobile_no, department, salary, dep_id)
+values ('dr. ahmed hassan', '999999999', 'engineering', 6000.00, 1);
+
+--update students to set him as advisor
+update student
+set advisor_id = 3
+where s_id = 1;   
+
+select 
+    s.F_name + ' ' + s.L_name as student_name
+from student s
+inner join Faculty f
+    on s.advisor_id = f.f_id
+where f.F_name = 'dr. ahmed hassan';
+
+
+--9. Retrieve each student's name and the titles of courses they are enrolled in, ordered by course title. 
+
+select 
+    s.f_name + ' ' + s.l_name as student_name,
+    c.course_name as course_title
+from student s
+inner join student_course sc
+    on s.s_id = sc.stu_id
+inner join course c
+    on sc.cou_id = c.course_id
+order by c.course_name;
+
+
+--10. For each class in Building 'Main', retrieve class ID, course name, department name, and faculty name teaching the class.
+
+select 
+    e.exam_code as class_id,
+    c.course_name,
+    d.d_name as department_name,
+    f.f_name as faculty_name
+from exams e
+inner join course c
+    on e.dep_id = c.dep_id
+inner join department d
+    on c.dep_id = d.d_id
+inner join faculty f
+    on f.dep_id = d.d_id
+where e.room like 'main%';      ------no main building
+
+--11. Display all faculty members who manage any department. 
+
+select 
+    f.f_name as faculty_name
+from faculty f
+where f.dep_id is not null;
+
+---12. Display all students and their advisors' names, even if some students don’t have advisors yet.
+
+select 
+    s.f_name + ' ' + s.l_name as student_name,
+    f.f_name  as advisor_name
+from student s
+left join faculty f
+    on s.advisor_id = f.f_id;
