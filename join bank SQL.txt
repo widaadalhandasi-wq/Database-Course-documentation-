@@ -1,0 +1,210 @@
+use BankDB
+
+---1. Display branch ID, name, and the name of the employee who manages it. 
+
+SELECT 
+    b.branch_id,
+    b.street + ', ' + b.city AS BranchName,
+    e.name AS ManagerName
+FROM Branch b
+LEFT JOIN Employees e
+    ON b.branch_id = e.bran_id AND e.pos_id = 1;
+
+---2. Display branch names and the accounts opened under each. 
+
+SELECT 
+    b.street + ', ' + b.city AS BranchName,
+    a.account_no
+FROM Branch b
+inner JOIN Employees e 
+ON b.branch_id = e.bran_id
+inner JOIN Account a
+ON a.cust_id IN (
+    SELECT c.customer_id 
+    FROM Customers c
+)
+ORDER BY BranchName, a.account_no;
+
+--3. Display full customer details along with their loans. 
+
+SELECT 
+    c.*,
+    l.loan_id,
+    l.amount,
+    lt.type_name AS LoanType
+FROM Customers c
+LEFT JOIN Loans l
+ON c.customer_id = l.cus_id
+LEFT JOIN LoanType lt 
+ON l.lo_type_id = lt.loan_type_id;
+
+
+--4. Display loan records where the loan office is in 'Alexandria' or 'Giza'. 
+
+---Insert branches with cities Alexandria and Giza
+INSERT INTO Branch (branch_id, street, city, state, zip_code, phone_number)
+VALUES
+(3, '12 Corniche St', 'Alexandria', 'Alexandria', '21500', '034567890'),
+(4, '25 Haram St', 'Giza', 'Giza', '12511', '023456789');
+
+
+---Assign employees (loan officers) to those branches
+
+INSERT INTO Employees (employee_id,name, pos_id, bran_id)
+VALUES
+(4,'Hassan Mahmoud', 3, 3),   -- Loan Officer in Alexandria
+(5,'Salma Adel', 3, 4);       -- Loan Officer in Giza
+
+
+---Create loans handled by those employees
+
+INSERT INTO Loans (loan_id, lo_type_id, issue_date, amount, cus_id, emp_id)
+VALUES
+(3, 1, '2025-03-10', 120000.00, 1, 4),
+(4, 2, '2025-03-15', 80000.00, 2, 5);
+
+SELECT 
+    l.loan_id,
+    l.amount,
+    c.name AS CustomerName,
+    e.name AS EmployeeName,
+    b.city AS BranchCity
+FROM Loans l
+JOIN Employees e ON l.emp_id = e.employee_id
+JOIN Branch b ON e.bran_id = b.branch_id
+JOIN Customers c ON l.cus_id = c.customer_id
+WHERE b.city IN ('Alexandria', 'Giza');
+
+
+--5. Display account data where the type starts with "S" (e.g., "Savings"). 
+
+SELECT 
+    a.account_no,
+    a.balance,
+    at.type_name
+FROM Account a
+inner JOIN AccountType at 
+ON a.acc_type_id = at.account_type_id
+WHERE at.type_name LIKE 'S%';
+
+--6. List customers with accounts having balances between 20,000 and 50,000. 
+
+SELECT DISTINCT
+    c.customer_id,
+    c.name
+FROM Customers c
+JOIN Account a ON c.customer_id = a.cust_id
+WHERE a.balance BETWEEN 20000 AND 50000;      ----no balance between this range
+
+
+
+--7. Retrieve customer names who borrowed more than 100,000 LE from 'Cairo Main Branch'. 
+
+ --Insert Cairo Main Branch
+ INSERT INTO Branch (branch_id, street, city, state, zip_code, phone_number)
+VALUES
+(5, '1 Tahrir Square', 'Cairo', 'Cairo', '11511', '022345678');
+
+--Add an employee (loan officer) in Cairo branch
+INSERT INTO Employees (employee_id, name, pos_id, bran_id)
+VALUES
+(6, 'Amira Khaled', 3, 5);   -- Loan Officer in Cairo
+
+--Create a loan greater than 100,000 in Cairo
+
+INSERT INTO Loans (loan_id, lo_type_id, issue_date, amount, cus_id, emp_id)
+VALUES
+(5, 1, '2025-04-01', 150000.00, 1, 6);
+
+SELECT DISTINCT
+    c.name AS CustomerName
+FROM Loans l
+inner JOIN Customers c 
+ON l.cus_id = c.customer_id
+inner JOIN Employees e
+ON l.emp_id = e.employee_id
+inner JOIN Branch b
+ON e.bran_id = b.branch_id
+WHERE l.amount > 100000
+  AND b.city = 'Cairo';
+
+
+
+---8. Find all customers assisted by employee "Amira Khaled".
+
+--Insert an action performed by Amira Khaled
+INSERT INTO EmployeeCustomerAction
+(action_id, action_date, cus_id, emp_id, act_type_id)
+VALUES
+(3, '2025-04-02', 1, 6, 1);
+
+SELECT DISTINCT
+    c.name AS CustomerName
+FROM EmployeeCustomerAction eca
+JOIN Customers c 
+ON eca.cus_id = c.customer_id
+JOIN Employees e
+ON eca.emp_id = e.employee_id
+WHERE e.name = 'Amira Khaled';
+
+
+---9. Display each customer’s name and the accounts they hold, sorted by account type. 
+
+SELECT 
+    c.name AS CustomerName,
+    a.account_no,
+    at.type_name AS AccountType
+FROM Customers c
+JOIN Account a
+ON c.customer_id = a.cust_id
+JOIN AccountType at 
+ON a.acc_type_id = at.account_type_id
+ORDER BY c.name, at.type_name;
+
+
+--10. For each loan issued in Cairo, show loan ID, customer name, employee handling it, and branch name.
+
+SELECT 
+    l.loan_id,
+    c.name AS CustomerName,
+    e.name AS EmployeeName,
+    b.street + ', ' + b.city AS BranchName
+FROM Loans l
+JOIN Customers c 
+ON l.cus_id = c.customer_id
+JOIN Employees e 
+ON l.emp_id = e.employee_id
+JOIN Branch b
+ON e.bran_id = b.branch_id
+WHERE b.city = 'Cairo';
+
+
+---11. Display all employees who manage any branch. 
+
+SELECT DISTINCT
+    e.name AS ManagerName,
+    b.branch_id,
+    b.street + ', ' + b.city AS BranchName
+FROM Employees e
+JOIN Branch b ON e.bran_id = b.branch_id
+WHERE e.pos_id = 1;
+
+
+
+---12. Display all customers and their transactions, even if some customers have no transactions yet. 
+
+SELECT 
+    c.customer_id,
+    c.name AS CustomerName,
+    t.transaction_id,
+    t.transaction_date,
+    t.amount,
+    tt.type_name AS TransactionType
+FROM Customers c
+LEFT JOIN Account a
+ON c.customer_id = a.cust_id
+LEFT JOIN Transactions t 
+ON a.account_no = t.acc_no
+LEFT JOIN TransactionType tt 
+ON t.tran_type_id = tt.transaction_type_id
+ORDER BY c.customer_id, t.transaction_date;
