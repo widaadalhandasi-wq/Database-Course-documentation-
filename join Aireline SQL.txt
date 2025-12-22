@@ -1,0 +1,285 @@
+use AirlineDB
+
+--1. Display each flight leg's ID, schedule, and the name of the airplane assigned to it. 
+
+select 
+    f.leg_no,
+    f.scheduleddeptime,
+    f.scheduledarrtime,
+    a.t_name as airplanetype
+from flightleg f
+inner join leginstance l 
+on f.leg_no = l.legno
+inner join airplane a 
+on l.airplaneid = a.airplane_id;
+
+
+
+---2. Display all flight numbers and the names of the departure and arrival airports. 
+
+select 
+    fl.f_id as flight_no,
+    a1.airpor_name as departure_airport,
+    a2.airpor_name as arrival_airport
+from flightleg fl
+inner join airport a1 
+on fl.depairportcode = a1.airport_code
+inner join airport a2 
+on fl.arrairportcode = a2.airport_code;
+
+
+
+---3. Display all reservation data with the name and phone of the customer who made each booking. 
+
+select r.*,
+    l.leginstanceid,
+    l.departuretime,
+    l.arrivaltime
+from reservation r
+inner join leginstance l 
+on r.leg_instanceid = l.leginstanceid;
+
+
+
+
+---4. Display IDs and locations of flights departing from 'CAI' or 'DXB'. 
+
+select 
+    fl.leg_no,
+    a.city as departure_city,
+    a.state as departure_state,
+    a.airpor_name as departure_airport
+from flightleg fl
+inner join airport a
+on fl.depairportcode = a.airport_code
+where a.airport_code in ('cai', 'dxb');
+
+
+---5. Display full data of flights whose names start with 'A'. 
+
+--alter
+alter table Flight
+add Flight_Name varchar(50);
+
+--update 
+update Flight
+set Flight_Name = 'A110'
+where Flight_No = 1;
+
+update Flight
+set Flight_Name = 'B220'
+where Flight_No = 2;
+
+--
+select * from Flight;
+
+--
+select *
+from Flight
+where Flight_Name like 'A%';
+
+
+
+---6. List customers who have bookings with total payment between 3000 and 5000. 
+
+--alter
+alter table Reservation
+add Amount decimal(10,2) null;
+
+-- update
+update Reservation
+set Amount = 3500.00
+where ReservationID = 1;
+
+update Reservation
+set Amount = 4200.00
+where ReservationID = 2;
+
+update Reservation
+set Amount = 2500.00
+where ReservationID = 3;
+
+-- 
+select * from Reservation;
+
+--
+select 
+    CustomerName,
+    CustomerPhone,
+    Amount as TotalPayment
+from Reservation
+where Amount between 3000 and 5000;
+
+
+
+---7. Retrieve all passengers on 'Flight 110' who booked more than 2 seats. 
+
+-- alter (Add SeatCount column )
+alter table Reservation
+add SeatCount int null;
+
+-- update
+update Reservation
+set SeatCount = 3  
+where ReservationID = 1;
+
+update Reservation
+set SeatCount = 2
+where ReservationID = 3;
+
+-- Check the result
+select * from Reservation;
+
+-- Add FlightNumber column
+alter table Reservation
+add FlightNumber varchar(50) null;
+
+-- Update
+update Reservation
+set FlightNumber = '110'
+where ReservationID = 1;
+
+update Reservation
+set FlightNumber = '112'
+where ReservationID = 3;
+
+-- Check the result
+select * from Reservation;
+
+--then:
+select 
+    CustomerName,
+    CustomerPhone,
+    SeatCount,
+    FlightNumber
+from Reservation
+where FlightNumber = '110' and SeatCount > 2;
+
+
+----8. Find names of passengers whose booking was handled by agent "Youssef Hamed". 
+
+-- Add Agent column to store the booking agent's name
+alter table Reservation
+add Agent varchar(100) null;
+
+-- update
+update Reservation
+set Agent = 'Youssef Hamed'
+where ReservationID = 1;
+
+update Reservation
+set Agent = 'Ali Saleh'
+where ReservationID = 3;
+
+-- 
+select*from Reservation;
+
+--then:
+select*from Reservation
+where Agent = 'Youssef Hamed';
+
+
+
+
+---9. Display each passenger’s name and the flights they booked, ordered by flight date.
+
+select 
+    r.CustomerName,
+    r.CustomerPhone,
+    r.FlightNumber,
+    r.SeatCount,
+    l.DepartureTime
+from Reservation r
+inner join LegInstance l
+on r.Leg_InstanceID = l.LegInstanceID
+inner join FlightLeg fl
+on l.LegNo = fl.Leg_No
+inner join Flight f
+on fl.F_ID = f.Flight_No
+order by l.DepartureTime;
+
+
+
+---10. For each flight departing from 'Cairo', display the flight number, departure time, and airline name. 
+
+--first:
+insert into Airport(Airport_Code, Airpor_Name, City, State)
+values ('CRA', 'Cairo International Airport', 'Cairo', 'Egypt');
+
+-- Assume Flight_No = 1 exists
+insert into FlightLeg(DepAirportCode, ArrAirportCode, ScheduledDepTime, ScheduledArrTime, F_ID)
+values ('CRA', 'DXB', '09:00', '12:00', 1);
+
+-- Get the Leg_No of the newly inserted flight leg
+declare @legno int;
+select top 1 @legno = Leg_No from FlightLeg where DepAirportCode = 'CRA' order by Leg_No desc;
+
+insert into LegInstance (LegInstanceID, LegNo, DepartureTime, ArrivalTime, AvailableSeats, AirplaneID)
+values (400, @legno, '2025-06-10 09:00', '2025-06-10 12:00', 150, 1);
+
+
+--then:
+
+select 
+    f.Flight_No,
+    f.Flight_Name,
+    l.DepartureTime,
+    f.Airline,
+	a.City as DepartureCity
+from Flight f
+inner join FlightLeg fl 
+on f.Flight_No = fl.F_ID
+inner join LegInstance l
+on fl.Leg_No = l.LegNo
+inner join Airport a 
+on fl.DepAirportCode = a.Airport_Code
+where a.City = 'Cairo';
+
+
+--11. Display all staff members who are assigned as supervisors for flights. 
+
+--Add a Staff table:
+create table Staff (
+    StaffID int primary key identity(1,1),
+    Name varchar(100),
+    Role varchar(50)
+);
+
+insert into Staff (Name, Role)
+values
+('Ahmed Ali', 'Supervisor'),
+('Sara Hassan', 'Supervisor'),
+('Youssef Hamed', 'Agent');
+
+--Add a Supervisor assignment table:
+create table FlightSupervisor (
+    Flight_No int,
+    StaffID int,
+    primary key (Flight_No, StaffID),
+    foreign key (Flight_No) references Flight(Flight_No),
+    foreign key (StaffID) references Staff(StaffID)
+);
+
+insert into FlightSupervisor (Flight_No, StaffID)
+values
+(1, 1);     -- Ahmed Ali supervises Flight 1
+
+
+--then:
+
+select s.Name, s.Role, f.Flight_No, f.Flight_Name
+from Staff s
+inner join FlightSupervisor fs on s.StaffID = fs.StaffID
+inner join Flight f on fs.Flight_No = f.Flight_No;
+
+
+---12. Display all bookings and their related passengers, even if some bookings are unpaid
+
+select 
+    CustomerName,
+    CustomerPhone,
+    FlightNumber,
+    SeatCount,
+    Amount,
+    Agent
+from Reservation;
