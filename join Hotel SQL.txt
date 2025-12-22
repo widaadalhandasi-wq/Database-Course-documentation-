@@ -1,0 +1,179 @@
+use HotelDB
+
+------Hotel Database – JOIN Queries 
+
+---1. Display hotel ID, name, and the name of its manager. 
+
+select b.branch_id as hotelID, b.name as hotelname, s.name as managername
+from branch b
+inner join staff s 
+on b.branch_id = s.b_id
+where s.job_title = 'manager';
+
+
+----2. Display hotel names and the rooms available under them. 
+
+select b.name as hotelname, r.room_no, r.type, r.nightly_rate
+from branch b
+inner join room r
+on b.branch_id = r.b_id
+order by b.name, r.room_no;
+
+
+
+----3. Display guest data along with the bookings they made. 
+
+select c.customer_id, 
+       c.name as customername,
+       c.email, 
+       c.phone,
+      bk.booking_id, 
+	  bk.check_in_date,
+	  bk.check_out_date, 
+	  bk.status, 
+	  bk.total_cost
+from customer c
+left join booking bk 
+on c.customer_id = bk.cus_id
+order by c.customer_id, bk.booking_id;
+
+
+
+---4. Display bookings for hotels in 'Hurghada' or 'Sharm El Sheikh'. 
+
+--- insted of 'Hurghada' or 'Sharm El Sheikh', i well use ('New York', 'Los Angeles')
+
+select b.name as hotelname, bk.booking_id, c.name as customername, bk.check_in_date, bk.check_out_date
+from branch b
+inner join room r 
+on b.branch_id = r.b_id
+inner join booking_room br
+on r.room_no = br.r_no
+inner join booking bk 
+on br.book_id = bk.booking_id
+inner join customer c
+on bk.cus_id = c.customer_id
+where b.location in ('New York', 'Los Angeles');
+
+
+
+---5. Display all room records where room type starts with "S" (e.g., "Suite", "Single").
+
+select *
+from room
+where type like 's%';
+
+
+
+--6. List guests who booked rooms priced between 1500 and 2500 LE. 
+
+select distinct c.name as customername, r.room_no, r.nightly_rate
+from customer c
+inner join booking bk 
+on c.customer_id = bk.cus_id
+inner join booking_room br
+on bk.booking_id = br.book_id
+inner join room r 
+on br.r_no = r.room_no
+where r.nightly_rate between  100 and 300;  -- matches my current data
+
+
+----7. Retrieve guest names who have bookings marked as 'Confirmed' in hotel "Hilton Downtown". 
+
+
+select distinct c.name as customername
+from customer c
+inner join booking bk 
+on c.customer_id = bk.cus_id
+inner join booking_room br
+on bk.booking_id = br.book_id
+inner join room r
+on br.r_no = r.room_no
+inner join branch b 
+on r.b_id = b.branch_id
+where bk.status = 'confirmed'
+  and b.name = 'Downtown Hotel';    ----i use 'Downtown Hotel' insted of "Hilton Downtown". 
+
+ 
+
+
+----8. Find guests whose bookings were handled by staff member "Mona Ali". 
+
+-- insert Mona Ali as a staff member
+insert into staff (name, salary, job_title, b_id)
+values ('Mona Ali', 2500.00, 'Receptionist', 1);  -- assuming branch_id = 1 exists
+
+--
+insert into staff_action (action_type, action_date_time, staf_id, book_id)
+values ('Check-in', '2025-12-20 14:00', 6, 1);
+
+
+select distinct c.name as customername, bk.booking_id
+from customer c
+inner join booking bk
+on c.customer_id = bk.cus_id
+inner join staff_action sa
+on bk.booking_id = sa.book_id
+inner join staff s
+on sa.staf_id = s.staff_id
+where s.name = 'mona ali';
+
+
+
+---9. Display each guest’s name and the rooms they booked, ordered by room type. 
+
+select c.name as customername, r.room_no, r.type as roomtype
+from customer c
+inner join booking bk 
+on c.customer_id = bk.cus_id
+inner join booking_room br 
+on bk.booking_id = br.book_id
+inner join room r 
+on br.r_no = r.room_no
+order by c.name, r.type;
+
+
+---10. For each hotel in 'Cairo', display hotel ID, name, manager name, and contact info.
+
+select b.branch_id, b.name as hotelname, s.name as managername, s.salary, s.job_title
+from branch b
+inner join staff s 
+on b.branch_id = s.b_id
+where b.location = 'new york'      -- insted of Cairo , i use new yourk
+  and s.job_title = 'manager';
+
+
+---11. Display all staff members who hold 'Manager' positions. 
+
+select staff_id, name, job_title, b_id, salary
+from staff
+where job_title = 'manager';
+
+
+
+----12. Display all guests and their reviews, even if some guests haven't submitted any reviews. 
+
+
+--Create a Review table
+
+create table Review (
+    review_id int primary key identity(1,1),
+    cus_id int not null,
+    review_text nvarchar(500),
+    rating int,
+    foreign key (cus_id) references Customer(Customer_id)
+);
+
+--Insert some reviews
+
+insert into Review (cus_id, review_text, rating)
+values
+(1, 'Great service!', 5),
+(3, 'Room was clean and comfortable.', 4);
+
+--then:
+
+select c.name as customername, r.review_text, r.rating
+from customer c
+left join review r
+on c.customer_id = r.cus_id;
