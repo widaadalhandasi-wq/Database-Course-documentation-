@@ -1,0 +1,152 @@
+use LibraryDB
+
+----1. Display library ID, name, and the name of the manager. 
+
+select l.library_id,
+       l.name as library_name,
+       s.full_name as manager_name
+from library l
+inner join staff s
+  on l.library_id = s.LIB_id;
+
+
+
+----2. Display library names and the books available in each one. 
+
+select l.name as library_name,
+       b.title as book_title
+from library l
+inner join book b
+  on l.library_id = b.LIB_id
+where b.availabilitystatus = 1;
+
+
+-----3. Display all member data along with their loan history. 
+
+select m.*, 
+       l.loan_date,
+       l.due_date,
+       l.return_date,
+       l.status
+from member m
+left join loan l
+  on m.member_id = l.MEM_id;
+
+
+
+----4. Display all books located in 'Zamalek' or 'Downtown'. 
+
+SELECT b.*,
+       l.location
+from Book b
+inner join Library l
+  on b.LIB_id = l.library_id
+where l.location in ('muscat', 'nizwa');   --insted of 'Zamalek' or 'Downtown', i use muscat and nizwa
+
+
+-----5. Display all books whose titles start with 'T'. 
+
+
+--insert book with title starting with T
+insert into book (ISBN, title, genre, price, shelf_location, LIB_id, published_year)
+values
+('9786666666666', 'The Alchemist', 'fiction', 180.00, 'f6', 1, 2018);
+
+--
+select *
+from book
+where title like 'T%';
+
+----6. List members who borrowed books priced between 100 and 300 LE. 
+
+--Borrow the 180-price book
+insert into loan (loan_date, MEM_id, B_id, due_date,return_date,status)
+values (getdate(),1,(select book_id from book where title = 'The Alchemist'),  dateadd(day, 14, getdate()),dateadd (day, 12, getdate()),'returned')
+--
+
+select distinct m.*
+from member m
+inner join loan l
+  on m.member_id = l.MEM_id
+inner join book b
+  on l.B_id = b.book_id
+where b.price between 100 and 300;
+
+
+
+---7. Retrieve members who borrowed and returned books titled 'The Alchemist'. 
+
+select distinct m.*,l.status
+from member m    
+inner join loan l
+  on m.member_id = l.MEM_id
+inner join book b
+  on l.B_id = b.book_id
+where b.title = 'The Alchemist'
+ and l.status = 'returned';
+
+
+
+---8. Find all members assisted by librarian "Sarah Fathy". 
+
+select distinct m.*
+from member m
+inner join loan l
+  on m.member_id = l.MEM_id
+inner join book b
+  on l.B_id = b.book_id
+inner join staff s
+  on b.LIB_id = s.LIB_id
+where s.full_name = 'sara hassan';
+
+
+
+
+---9. Display each member’s name and the books they borrowed, ordered by book title. 
+
+select m.full_name as member_name,
+       b.title as book_title
+from member m
+inner join loan l
+  on m.member_id = l.MEM_id
+inner join book b
+  on l.B_id = b.book_id
+order by b.title;
+
+
+
+---10. For each book located in 'Cairo Branch', show title, library name, manager, and shelf info. 
+
+select b.title,
+       l.name as library_name,
+       s.full_name as manager_name,
+       b.shelf_location
+from book b
+inner join library l
+  on b.LIB_id = l.library_id
+inner join staff s
+  on l.library_id = s.LIB_id
+where l.name = 'central library';
+
+
+
+
+
+---11. Display all staff members who manage libraries. 
+
+select distinct s.*
+from staff s
+inner join library l
+  on s.LIB_id = l.library_id;
+
+
+
+
+----12. Display all members and their reviews, even if some didn’t submit any review yet.
+
+select m.full_name,
+       r.rating,
+       r.comments
+from member m
+left join review r
+  on m.member_id = r.MEM_id;
