@@ -1,0 +1,532 @@
+create database AggregationDB
+use AggregationDB
+
+-- Create Tables 
+
+CREATE TABLE Instructors ( 
+InstructorID INT PRIMARY KEY, 
+FullName VARCHAR(100), 
+Email VARCHAR(100), 
+JoinDate DATE 
+); 
+
+
+CREATE TABLE Categories ( 
+CategoryID INT PRIMARY KEY, 
+CategoryName VARCHAR(50) 
+); 
+
+
+CREATE TABLE Courses ( 
+CourseID INT PRIMARY KEY, 
+Title VARCHAR(100), 
+InstructorID INT, 
+CategoryID INT, 
+Price DECIMAL(6,2), 
+PublishDate DATE, 
+FOREIGN KEY (InstructorID) REFERENCES Instructors(InstructorID), 
+FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID) 
+); 
+
+
+CREATE TABLE Students ( 
+StudentID INT PRIMARY KEY, 
+FullName VARCHAR(100), 
+Email VARCHAR(100), 
+JoinDate DATE 
+); 
+
+
+CREATE TABLE Enrollments ( 
+EnrollmentID INT PRIMARY KEY, 
+StudentID INT, 
+CourseID INT, 
+EnrollDate DATE, 
+CompletionPercent INT, 
+Rating INT CHECK (Rating BETWEEN 1 AND 5), 
+FOREIGN KEY (StudentID) REFERENCES Students(StudentID), 
+FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) 
+); 
+
+
+--- Insert Sample Data
+
+INSERT INTO Instructors VALUES 
+(1, 'Sarah Ahmed', 'sarah@learnhub.com', '2023-01-10'), 
+(2, 'Mohammed Al-Busaidi', 'mo@learnhub.com', '2023-05-21'); 
+
+
+INSERT INTO Categories VALUES 
+(1, 'Web Development'), 
+(2, 'Data Science'), 
+(3, 'Business'); 
+
+
+INSERT INTO Courses VALUES 
+(101, 'HTML & CSS Basics', 1, 1, 29.99, '2023-02-01'), 
+(102, 'Python for Data Analysis', 2, 2, 49.99, '2023-03-15'), 
+(103, 'Excel for Business', 2, 3, 19.99, '2023-04-10'), 
+(104, 'JavaScript Advanced', 1, 1, 39.99, '2023-05-01'); 
+
+
+INSERT INTO Students VALUES 
+(201, 'Ali Salim', 'ali@student.com', '2023-04-01'), 
+(202, 'Layla Nasser', 'layla@student.com', '2023-04-05'), 
+(203, 'Ahmed Said', 'ahmed@student.com', '2023-04-10'); 
+
+
+INSERT INTO Enrollments VALUES 
+(1, 201, 101, '2023-04-10', 100, 5), 
+(2, 202, 102, '2023-04-15', 80, 4), 
+(3, 203, 101, '2023-04-20', 90, 4), 
+(4, 201, 102, '2023-04-22', 50, 3), 
+(5, 202, 103, '2023-04-25', 70, 4), 
+(6, 203, 104, '2023-04-28', 30, 2), 
+(7, 201, 104, '2023-05-01', 60, 3);
+
+
+---Part 1: Warm-Up 
+
+---1. Display all courses with prices. 
+
+select title as course_titel,
+       price
+from Courses
+
+---2. Display all students with join dates. 
+
+select FullName as Student_name, JoinDate
+from Students
+
+
+
+---3. Show all enrollments with completion percent and rating. 
+
+SELECT EnrollmentID, StudentID, CourseID, CompletionPercent, Rating 
+FROM Enrollments;
+
+
+---4. Count instructors who joined in 2023. 
+select count (*) AS Instructors2023
+FROM Instructors
+WHERE YEAR(JoinDate) = 2023;
+
+
+---5. Count students who joined in April 2023.
+
+SELECT COUNT(*) AS StudentsApril2023
+FROM Students
+WHERE YEAR(JoinDate) = 2023 AND MONTH(JoinDate) = 4;
+
+
+
+--Part 2: Beginner Aggregation
+
+---1. Count total number of students. 
+select count (*) AS TotalStudents
+FROM Students;
+
+
+--2. Count total number of enrollments. 
+
+select count (*) AS Enrollments
+from Enrollments
+
+---3. Find average rating per course. 
+select CourseID, avg(Rating) AS AvgRating
+FROM Enrollments 
+GROUP BY CourseID;
+
+--4. Count courses per instructor. 
+
+select InstructorID,count(*) as TotalCourses
+FROM Courses
+GROUP BY InstructorID;
+
+
+---5. Count courses per category. 
+select categoryID, count (*) as total_course
+from Courses
+group by CategoryID
+
+
+--6. Count students enrolled in each course. 
+SELECT CourseID, COUNT(StudentID) AS StudentsEnrolled
+FROM Enrollments
+GROUP BY CourseID;
+
+
+---7. Find average course price per category. 
+SELECT CategoryID, AVG(Price) AS AvgPrice
+FROM Courses
+GROUP BY CategoryID;
+
+
+---8. Find maximum course price. 
+SELECT MAX(Price) AS MaxPrice
+FROM Courses;
+
+---9. Find min, max, and average rating per course. 
+
+SELECT CourseID, MIN(Rating) AS MinRating, MAX(Rating) AS MaxRating, AVG(Rating) AS AvgRating
+FROM Enrollments
+GROUP BY CourseID;
+
+--10. Count how many students gave rating = 5.
+SELECT COUNT(*) AS CountRating5
+FROM Enrollments
+WHERE Rating = 5;
+
+
+---Part 3: Extended Beginner Practice
+
+--11. Count enrollments per month. 
+select  MONTH (EnrollDate) AS Month, count(*) AS Enrollments
+FROM Enrollments
+GROUP BY  MONTH(EnrollDate)
+ORDER BY  Month;
+
+--12. Find average course price overall.
+select avg (price) as average_course_price
+from Courses
+
+--13. Count students per join month. 
+
+select month (JoinDate) as Month ,count(*) as students_joined
+from Students
+GROUP BY month (JoinDate)
+ORDER BY  Month;
+
+
+--14.Count ratings per value (1–5). 
+
+select Rating, COUNT(*) AS CountRatings
+FROM Enrollments
+GROUP BY Rating
+
+--15. Find courses that never received rating = 5. 
+SELECT CourseID, Title
+FROM Courses
+WHERE CourseID NOT IN (
+    SELECT CourseID
+    FROM Enrollments
+    WHERE Rating = 5
+);
+
+--16. Count courses priced above 30. 
+SELECT COUNT(*) AS CoursesAbove30
+FROM Courses
+WHERE Price > 30;
+
+--17. Find average completion percentage. 
+SELECT AVG(CompletionPercent) AS AvgCompletion
+FROM Enrollments;
+
+--18. Find course with lowest average rating.
+
+SELECT CourseID, AVG(Rating) AS AvgRating
+FROM Enrollments
+GROUP BY CourseID
+ORDER BY AvgRating ASC
+
+
+
+
+--Day 1 Mini Challenge 
+--Course Performance Snapshot 
+--Show: 
+--• Course title 
+--• Total enrollments 
+--• Average rating 
+--• Average completion %
+
+SELECT 
+    c.Title,
+    COUNT(e.StudentID) AS TotalEnrollments,
+    AVG(e.Rating) AS AvgRating,
+    AVG(e.CompletionPercent) AS AvgCompletion
+FROM Courses c
+LEFT JOIN Enrollments e
+ON c.CourseID = e.CourseID
+GROUP BY c.Title;
+
+
+
+--part 4: JOIN + Aggregation 
+--1. Course title + instructor name + enrollments. 
+
+SELECT 
+    c.Title,
+    i.FullName AS InstructorName,
+    COUNT(e.EnrollmentID) AS TotalEnrollments
+FROM Courses c
+inner JOIN Instructors i
+ON c.InstructorID = i.InstructorID
+LEFT JOIN Enrollments e
+ON c.CourseID = e.CourseID
+GROUP BY c.Title, i.FullName;
+
+
+
+--2. Category name + total courses + average price. 
+
+SELECT 
+    cat.CategoryName,
+    COUNT(c.CourseID) AS TotalCourses,
+    AVG(c.Price) AS AvgPrice
+FROM Categories cat
+LEFT JOIN Courses c 
+ON cat.CategoryID = c.CategoryID
+GROUP BY cat.CategoryName;
+
+--3. Instructor name + average course rating. 
+
+SELECT 
+    i.FullName AS InstructorName,
+    AVG(e.Rating) AS AvgRating
+FROM Instructors i
+inner JOIN Courses c ON 
+i.InstructorID = c.InstructorID
+JOIN Enrollments e
+ON c.CourseID = e.CourseID
+GROUP BY i.FullName;
+
+
+--4. Student name + total courses enrolled. 
+
+SELECT 
+    s.FullName AS StudentName,
+    COUNT(e.CourseID) AS TotalCourses
+FROM Students s
+LEFT JOIN Enrollments e
+ON s.StudentID = e.StudentID
+GROUP BY s.FullName;
+
+
+---5. Category name + total enrollments. 
+
+SELECT 
+ cat.CategoryName, COUNT (e.EnrollmentID) as total_enrollments
+ from Categories cat
+ inner join Courses c
+ on cat.CategoryID = c.CategoryID
+  inner join Enrollments e 
+  on  c.CourseID = e.CourseID
+  group by  cat.CategoryName
+
+
+
+---6. Instructor name + total revenue. 
+SELECT 
+    i.FullName AS InstructorName,
+    SUM(c.Price) AS TotalRevenue
+FROM Instructors i
+inner JOIN Courses c 
+ON i.InstructorID = c.InstructorID
+inner JOIN Enrollments e 
+ON c.CourseID = e.CourseID
+GROUP BY i.FullName;
+
+---7. Course title + % of students completed 100%. 
+
+SELECT 
+    c.Title,
+    (SUM(CASE WHEN e.CompletionPercent = 100 THEN 1 ELSE 0 END) * 100.0 
+     / COUNT(e.EnrollmentID)) AS CompletionPercentage
+FROM Courses c
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY c.Title;
+
+
+
+
+--Part 5: HAVING Practice 
+ 
+--Use HAVING only. 
+---1. Courses with more than 2 enrollments. 
+SELECT 
+    c.Title,
+    COUNT(e.EnrollmentID) AS TotalEnrollments
+FROM Courses c
+inner JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY c.Title
+HAVING COUNT(e.EnrollmentID) > 2;
+
+
+
+---2. Instructors with average rating above 4. 
+
+SELECT 
+    i.FullName,
+    AVG(e.Rating) AS AvgRating
+FROM Instructors i
+JOIN Courses c ON i.InstructorID = c.InstructorID
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY i.FullName
+HAVING AVG(e.Rating) > 4;
+
+
+
+---3. Courses with average completion below 60%. 
+
+SELECT 
+    c.Title,
+    AVG(e.CompletionPercent) AS AvgCompletion
+FROM Courses c
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY c.Title
+HAVING AVG(e.CompletionPercent) < 60;
+
+
+
+---4. Categories with more than 1 course. 
+
+SELECT 
+    cat.CategoryName,
+    COUNT(c.CourseID) AS TotalCourses
+FROM Categories cat
+JOIN Courses c ON cat.CategoryID = c.CategoryID
+GROUP BY cat.CategoryName
+HAVING COUNT(c.CourseID) > 1;
+
+
+---5. Students enrolled in at least 2 courses. 
+
+select 
+s.FullName,
+count (e.CourseID) as total_course
+from Students s
+inner join Enrollments e
+on s.StudentID=e.StudentID
+group by s.FullName
+having count( e.CourseID)>=2;
+
+ 
+--Part 6: Analytical Thinking 
+--Answer using SQL + short explanation:
+
+--1. Best performing course. 
+SELECT 
+    c.Title,
+    AVG(e.Rating) AS AvgRating
+FROM Courses c
+inner JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY c.Title
+ORDER BY AvgRating DESC
+
+
+--2. Instructor to promote. 
+
+SELECT 
+    i.FullName,
+    AVG(e.Rating) AS AvgRating
+FROM Instructors i
+JOIN Courses c ON i.InstructorID = c.InstructorID
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY i.FullName
+ORDER BY AvgRating DESC
+
+
+--3. Highest revenue category. 
+
+SELECT TOP 1
+    cat.CategoryName,
+    SUM(c.Price) AS TotalRevenue
+FROM Categories cat
+JOIN Courses c ON cat.CategoryID = c.CategoryID
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY cat.CategoryName
+ORDER BY SUM(c.Price) DESC;
+
+
+
+--4. Do expensive courses have better ratings?
+SELECT 
+    CASE 
+        WHEN c.Price >= 30 THEN 'Expensive'
+        ELSE 'Cheap'
+    END AS PriceCategory,
+    AVG(e.Rating) AS AvgRating
+FROM Courses c
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY 
+    CASE 
+        WHEN c.Price >= 30 THEN 'Expensive'
+        ELSE 'Cheap'
+    END;
+
+
+
+--5. Do cheaper courses have higher completion? 
+SELECT 
+    CASE 
+        WHEN c.Price < 30 THEN 'Cheap'
+        ELSE 'Expensive'
+    END AS PriceCategory,
+    AVG(e.CompletionPercent) AS AvgCompletion
+FROM Courses c
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY 
+    CASE 
+        WHEN c.Price < 30 THEN 'Cheap'
+        ELSE 'Expensive'
+    END;
+
+
+	--
+
+--	Final Challenge – Mini Analytics Report 
+
+---1. Top 3 courses by revenue.
+
+SELECT TOP 3
+    c.Title,
+    SUM(c.Price) AS TotalRevenue
+FROM Courses c
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY c.Title
+ORDER BY SUM(c.Price) DESC;
+
+
+--2. Instructor with most enrollments. 
+
+SELECT TOP 1
+    i.FullName,
+    COUNT(e.EnrollmentID) AS TotalEnrollments
+FROM Instructors i
+JOIN Courses c ON i.InstructorID = c.InstructorID
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY i.FullName
+ORDER BY COUNT(e.EnrollmentID) DESC;
+
+
+--3. Course with lowest completion rate. 
+
+SELECT TOP 1
+    c.Title,
+    AVG(e.CompletionPercent) AS AvgCompletion
+FROM Courses c
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY c.Title
+ORDER BY AVG(e.CompletionPercent) ASC;
+
+
+--4. Category with highest average rating. 
+SELECT TOP 1
+    cat.CategoryName,
+    AVG(e.Rating) AS AvgRating
+FROM Categories cat
+JOIN Courses c ON cat.CategoryID = c.CategoryID
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY cat.CategoryName
+ORDER BY AVG(e.Rating) DESC;
+
+
+--5. Student enrolled in most courses. 
+SELECT TOP 1
+    s.FullName,
+    COUNT(e.CourseID) AS TotalCourses
+FROM Students s
+JOIN Enrollments e ON s.StudentID = e.StudentID
+GROUP BY s.FullName
+ORDER BY COUNT(e.CourseID) DESC;
