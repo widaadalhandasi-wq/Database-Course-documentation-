@@ -1,0 +1,111 @@
+create database bankingsystemDB
+
+---Tables: 
+
+-- 1. Customer Table
+CREATE TABLE Customer ( 
+    CustomerID INT PRIMARY KEY, 
+    FullName NVARCHAR(100), 
+    Email NVARCHAR(100), 
+    Phone NVARCHAR(15), 
+    SSN CHAR(9) 
+);
+
+-- 2. Account Table
+CREATE TABLE Account ( 
+    AccountID INT PRIMARY KEY, 
+    CustomerID INT FOREIGN KEY REFERENCES Customer(CustomerID), 
+    Balance DECIMAL(10, 2), 
+    AccountType VARCHAR(50), 
+    Status VARCHAR(20) 
+);
+
+-- 3. Transaction Table
+CREATE TABLE [Transaction] ( 
+    TransactionID INT PRIMARY KEY, 
+    AccountID INT FOREIGN KEY REFERENCES Account(AccountID), 
+    Amount DECIMAL(10, 2), 
+    Type VARCHAR(10), -- Deposit, Withdraw 
+    TransactionDate DATETIME 
+);
+
+-- 4. Loan Table
+CREATE TABLE Loan ( 
+    LoanID INT PRIMARY KEY, 
+    CustomerID INT FOREIGN KEY REFERENCES Customer(CustomerID), 
+    LoanAmount DECIMAL(12, 2), 
+    LoanType VARCHAR(50), 
+    Status VARCHAR(20) 
+);
+
+-- Customers
+INSERT INTO Customer VALUES
+(1, 'Ahmed Ali', 'ahmed@gmail.com', '91234567', '123456789'),
+(2, 'Mona Hassan', 'mona@gmail.com', '92345678', '987654321');
+
+-- Accounts
+INSERT INTO Account VALUES
+(101, 1, 5000.00, 'Savings', 'Active'),
+(102, 1, 2000.00, 'Checking', 'Active'),
+(103, 2, 10000.00, 'Savings', 'Inactive');
+
+-- Transactions
+INSERT INTO [Transaction] VALUES
+(1001, 101, 1000.00, 'Deposit', GETDATE()-10),
+(1002, 101, 500.00, 'Withdraw', GETDATE()-5),
+(1003, 102, 200.00, 'Deposit', GETDATE()-40),
+(1004, 103, 1500.00, 'Deposit', GETDATE()-20);
+
+-- Loans
+INSERT INTO Loan VALUES
+(201, 1, 10000.00, 'Home Loan', 'Approved'),
+(202, 2, 5000.00, 'Car Loan', 'Pending');
+
+---Part 3: View Creation Scenarios:
+
+--1. Customer Service View 
+--• Show only customer name, phone, and account status (hide sensitive info like SSN or balance). 
+
+create view Vcustomer_service as
+select c.FullName as Customer_name,
+       c.Phone,
+	   a.Status as Account_Status
+from Customer c
+inner join Account a
+on c.CustomerID=a.CustomerID
+
+--show the result of view
+select*from Vcustomer_service
+
+--2. Finance Department View 
+--• Show account ID, balance, and account type. 
+
+
+create view Vfinance_department as
+select AccountID,Balance,AccountType
+from Account
+
+----show the result of view
+select*from Vfinance_department
+
+--3. Loan Officer View 
+--• Show loan details but hide full customer information. Only include CustomerID. 
+
+create view VLoan_officer as
+select LoanId,CustomerID,LoanAmount,LoanType,Status
+from Loan;
+       
+----show the result of view
+select*from VLoan_officer
+
+--
+--4. Transaction Summary View 
+--• Show only recent transactions (last 30 days) with account ID and amount. 
+
+create view Vtransaction_summary as
+select TransactionDate,AccountID,Amount
+from [Transaction]
+where TransactionDate >= DATEADD(DAY, -30, GETDATE());
+
+----show the result of view
+select*from Vtransaction_summary
